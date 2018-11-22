@@ -1,0 +1,128 @@
+#include <SoftwareSerial.h>
+
+byte RX = 10; // This is your RX-Pin on Arduino UNO,connect with A7 UTXD pin
+byte TX = 11; // This is your TX-Pin on Arduino UNO,connect with a7 URXD pin
+SoftwareSerial *A7board = new SoftwareSerial(RX, TX); 
+void print_result()
+{
+  Serial.print("A7 board info: ");
+  while( A7board->available() != 0)
+    Serial.write( A7board->read());
+  Serial.println();  
+}
+void setup() {
+  Serial.begin(115200);
+  A7board->begin(9600);
+  delay(200);
+   
+ Serial.println("AT+ on");  
+ A7board->println("AT+IPR=9600");  
+ delay(10000);
+ print_result();
+
+  Serial.println("Send AT command");  
+  A7board->println("AT");
+  delay(25000);
+  print_result();
+  
+  Serial.println("AT+GPS turn on");  
+  A7board->println("AT+GPS=1");  
+  delay(10000);
+  print_result();
+  
+  Serial.println("AT+GPSRD turn on");  
+  A7board->println("AT+GPSRD=1");  
+  delay(10000);
+  print_result();
+  }
+
+ void data() 
+    {
+      char gpstime[50];
+      char gpslat[50];
+      char gpslong[50];
+      char c,d,e;
+    if((A7board->available() !=0))
+  
+    { do
+    {c = A7board->read();}
+     while(c!='$');
+      if(c == '$')
+      {     
+        char c1 = A7board->read();
+       if(c1 == 'G')
+         { 
+          char c2 = A7board->read();
+          if(c2 == 'P')
+            { 
+              char c3 = A7board->read();
+             if(c3 == 'G')
+               {
+               char c4 = A7board->read();
+                if(c4 == 'G')
+                   {
+                    char c5 = A7board->read();
+                    if(c5 == 'A')
+                     {
+                      char c6 = A7board->read();
+                     if(c6 ==',')
+                     { for(int i=1;i<3;i++)
+                      { gpstime[i]= A7board->read();
+                      }
+                      gpstime[3]=':';
+                      for(int i=4;i<6;i++)
+                      { gpstime[i]=A7board->read();
+                      }
+                      gpstime[6]=':';
+                      for(int i=7;i<9;i++)
+                      { gpstime[i]=A7board->read();
+                      }
+                       do
+                         {d = A7board->read();}
+                          while(d!=',');
+                          for(int i=1;i<3;i++)
+                           {gpslat[i]=A7board->read();
+                           }
+                          gpslat[3]='°';
+                           for(int i=4;i<12;i++)
+                            {gpslat[i]=A7board->read();
+                            }
+                           A7board->read();
+                           gpslat[12]=A7board->read();
+                           A7board->read();
+                           for(int i=1;i<4;i++)
+                           { gpslong[i]=A7board->read();
+                           }
+                           gpslong[4]='°';
+                           for(int i=5;i<13;i++)
+                           { gpslong[i]=A7board->read();
+                           }
+                           A7board->read();
+                           gpslong[13]=A7board->read();
+                           
+                       Serial.print("A7 board info: ");
+                       Serial.print("Time:");
+                       for(int i=1;i<9;i++)
+                       { Serial.print(gpstime[i]);
+                         }
+                        Serial.println();
+                        Serial.print("Latitude:");
+                       for(int i=1;i<13;i++)
+                       { Serial.print(gpslat[i]);
+                         }
+                        Serial.println();
+                        Serial.print("Longitude:");
+                        for(int i=1;i<14;i++)
+                       { Serial.print(gpslong[i]);
+                         }
+                        Serial.println(); 
+                     }}}}}}}}
+                     } 
+   
+                          
+void loop() {
+    print_result();
+    delay(1000);
+    data();
+   delay(1000);
+}
